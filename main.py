@@ -13,7 +13,7 @@ def analyze_and_alert(symbol):
         action, analysis, target = analyze_market(df)
         if action:
             message = f"{action.upper()} {symbol} AGORA!"
-            Alvo estimado: {target}
+            message += f"\n🎯 Alvo estimado: {target}"
     message += f"\n📊 Análise: {analysis}"
             send_telegram_alert(message)
     except Exception as e:
