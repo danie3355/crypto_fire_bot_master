@@ -12,7 +12,7 @@ def analyze_and_alert(symbol):
         df = add_indicators(df)
         action, analysis, target = analyze_market(df)
         if action:
-            message = f"{action.upper()} {symbol} AGORA!
+            message = f"{action.upper()} {symbol} AGORA!"
 🎯 Alvo estimado: {target}
 📊 Análise: {analysis}"
             send_telegram_alert(message)
