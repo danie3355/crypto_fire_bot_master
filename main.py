@@ -3,7 +3,7 @@ import schedule
 from utils.indicators import fetch_price_data, calculate_indicators
 from utils.analyzer import analyze_market
 from utils.telegram import send_telegram_alert
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
 symbols = ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "SOLUSDT"]
 interval = "15m"
