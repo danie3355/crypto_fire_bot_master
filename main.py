@@ -5,7 +5,7 @@ import pandas as pd
 import time
 from config import SYMBOLS
 from utils.analyzer import analyze_market
-from utils.telegram import send_telegram_message
+from utils.telegram import send_telegram_alert
 
 def get_klines(symbol, interval='15m', limit=100):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
@@ -32,7 +32,7 @@ def main_loop():
                 if decisao:
                     preco_atual = df['close'].iloc[-1]
                     mensagem = f"{decisao} ({symbol})\nPreço atual: {preco_atual:.4f}\n📊 {explicacao}"
-                    send_telegram_message(mensagem)
+                    send_telegram_alert(mensagem)
         time.sleep(900)  # Espera 15 minutos
 
 if __name__ == "__main__":
