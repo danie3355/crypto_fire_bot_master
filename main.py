@@ -12,7 +12,7 @@ limit = 100
 def analyze_and_alert(symbol):
     try:
         df = fetch_price_data(symbol, interval, limit)
-        df = calculate_indicators(df)
+        df = calculate_indicators(df) #
         action, analysis, target = analyze_market(df)
         if action:
             message = f"{action.upper()} {symbol} AGORA!\n🎯 Alvo estimado: {target}\n📊 Análise: {analysis}"
