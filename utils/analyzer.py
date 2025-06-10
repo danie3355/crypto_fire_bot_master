@@ -1,13 +1,29 @@
+# utils/analyzer.py
+
+from utils.indicators import calculate_ema, calculate_rsi, calculate_macd
+
 def analyze_market(df):
-    last = df.iloc[-1]
-    previous = df.iloc[-2]
+    df['ema_fast'] = calculate_ema(df, period=9)
+    df['ema_slow'] = calculate_ema(df, period=21)
+    df['rsi'] = calculate_rsi(df)
+    df['macd'], df['signal'], df['histogram'] = calculate_macd(df)
 
-    buy_signal = last['ema_fast'] > last['ema_slow'] and previous['ema_fast'] <= previous['ema_slow']
-    sell_signal = last['ema_fast'] < last['ema_slow'] and previous['ema_fast'] >= previous['ema_slow']
+    latest = df.iloc[-1]
 
-    if buy_signal:
-        return "COMPRA AGORA", "📈 Expectativa de alta com alvo entre 5% a 15% acima.", "5–15% acima"
-    elif sell_signal:
-        return "VENDE JÁ", "⚠️ Expectativa de queda com possível correção de 5% a 12%.", "5–12% abaixo"
-    else:
-        return None, "⏸ Mercado neutro. Sem oportunidade clara agora.", "-"
+    # Condições de COMPRA
+    if (
+        latest['ema_fast'] > latest['ema_slow'] and
+        latest['rsi'] < 70 and
+        latest['macd'] > latest['signal']
+    ):
+        return "COMPRA AGORA", "Tendência de alta confirmada por EMA, RSI saudável e MACD positivo"
+
+    # Condições de VENDA
+    elif (
+        latest['ema_fast'] < latest['ema_slow'] and
+        latest['rsi'] > 30 and
+        latest['macd'] < latest['signal']
+    ):
+        return "VENDE JÁ", "Tendência de queda confirmada por cruzamento de EMA, RSI e MACD negativo"
+
+    return None, "Sem sinal claro no momento"
