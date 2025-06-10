@@ -17,8 +17,6 @@ for symbol in SYMBOLS:
         send_telegram_alert(message)
     except Exception as e:
         print(f"Erro ao analisar {symbol}: {e}")
-except Exception as e:
-    print(f"Erro ao analisar {symbol}: {e}")
 if __name__ == "__main__":
     while True:
         for symbol in SYMBOLS:
