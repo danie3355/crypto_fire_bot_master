@@ -1,21 +1,22 @@
+# utils/indicators.py
+
 import pandas as pd
-import requests
+import numpy as np
 
-def fetch_price_data(symbol, interval='1h', limit=100):
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}'
-    response = requests.get(url)
-    data = response.json()
+def calculate_ema(df, period=9, column='close'):
+    return df[column].ewm(span=period, adjust=False).mean()
 
-    df = pd.DataFrame(data, columns=[
-        'timestamp', 'open', 'high', 'low', 'close', 'volume',
-        'close_time', 'quote_asset_volume', 'num_trades',
-        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
-    ])
+def calculate_rsi(df, period=14, column='close'):
+    delta = df[column].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
 
-    df['close'] = df['close'].astype(float)
-    return df
-
-def calculate_indicators(df):
-    df['ema_fast'] = df['close'].ewm(span=9, adjust=False).mean()
-    df['ema_slow'] = df['close'].ewm(span=21, adjust=False).mean()
-    return df
+def calculate_macd(df, fast_period=12, slow_period=26, signal_period=9):
+    ema_fast = df['close'].ewm(span=fast_period, adjust=False).mean()
+    ema_slow = df['close'].ewm(span=slow_period, adjust=False).mean()
+    macd_line = ema_fast - ema_slow
+    signal_line = macd_line.ewm(span=signal_period, adjust=False).mean()
+    histogram = macd_line - signal_line
+    return macd_line, signal_line, histogram
