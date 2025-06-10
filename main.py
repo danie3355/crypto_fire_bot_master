@@ -1,21 +1,13 @@
-import schedule
 import time
-from utils.analyzer import analyze_and_alert
+from utils.analyzer import analyze_market
+from utils.telegram import send_telegram_message
 
-symbols = ['BTCUSDT', 'ETHUSDT', 'DOGEUSDT', 'SOLUSDT']
-
-def job():
-    for symbol in symbols:
-        try:
-            analyze_and_alert(symbol)
-        except Exception as e:
-            print(f"Erro ao analisar {symbol}: {e}")
-
-schedule.every(5).minutes.do(job)
+def main():
+    while True:
+        signals = analyze_market()
+        for signal in signals:
+            send_telegram_message(signal)
+        time.sleep(300)  # analisa a cada 5 minutos
 
 if __name__ == "__main__":
-    print("🔥 Bot de Alertas Iniciado (24/7)...")
-    job()  # executa na inicialização
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    main()
