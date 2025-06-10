@@ -35,3 +35,4 @@ def fetch_price_data(symbol: str, interval: str = "1h", limit: int = 100) -> pd.
     df["volume"] = df["volume"].astype(float)
 
     return df[["open_time", "open", "high", "low", "close", "volume"]]
+
