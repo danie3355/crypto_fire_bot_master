@@ -14,7 +14,7 @@ def analyze_and_alert(symbol):
         if action:
             message = f"{action.upper()} {symbol} AGORA!"
             Alvo estimado: {target}
-            Análise: {analysis}"
+    message += f"\n📊 Análise: {analysis}"
             send_telegram_alert(message)
     except Exception as e:
         print(f"Erro ao analisar {symbol}: {e}")
