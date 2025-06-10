@@ -1,14 +1,8 @@
 import pandas as pd
+import requests
 
-def calculate_indicators(df):
-    df['ema_fast'] = df['close'].ewm(span=9, adjust=False).mean()
-    df['ema_slow'] = df['close'].ewm(span=21, adjust=False).mean()
-    return df
-
-def fetch_price_data(symbol):
-    import requests
-
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=100'
+def fetch_price_data(symbol, interval='1h', limit=100):
+    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}'
     response = requests.get(url)
     data = response.json()
 
@@ -19,4 +13,9 @@ def fetch_price_data(symbol):
     ])
 
     df['close'] = df['close'].astype(float)
+    return df
+
+def calculate_indicators(df):
+    df['ema_fast'] = df['close'].ewm(span=9, adjust=False).mean()
+    df['ema_slow'] = df['close'].ewm(span=21, adjust=False).mean()
     return df
