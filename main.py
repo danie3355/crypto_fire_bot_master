@@ -7,17 +7,19 @@ from utils.data_fetcher import fetch_price_data
 from config import SYMBOLS, CHECK_INTERVAL
 
 def analyze_and_alert(symbol):
-    try:
-        df = fetch_price_data(symbol)
-        df = add_indicators(df)
-        action, analysis, target = analyze_market(df)
-        if action:
-            message = f"{action.upper()} {symbol} AGORA!"
-            message += f"\n🎯 Alvo estimado: {target}"
+   try:
+    df = fetch_price_data(symbol)
+    df = calculate_indicators(df)
+    action, analysis, target = analyze_market(df)
+
+    message = f"{action.upper()} {symbol} AGORA!"
+    message += f"\n🎯 Alvo estimado: {target}"
     message += f"\n📊 Análise: {analysis}"
-            send_telegram_alert(message)
-    except Exception as e:
-        print(f"Erro ao analisar {symbol}: {e}")
+
+    send_telegram_alert(message)
+
+except Exception as e:
+    print(f"Erro ao analisar {symbol}: {e}")
 
 if __name__ == "__main__":
     while True:
