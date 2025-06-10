@@ -1,6 +1,6 @@
 import time
 from config import SYMBOLS, CHECK_INTERVAL
-from utils.telegram import send_telegram_message
+from utils.telegram import send_telegram_alert
 from utils.analyzer import analyze_price
 import requests
 
@@ -22,7 +22,7 @@ def main():
             decision, target, indicators = analyze_price(price_data)
             if decision:
                 msg = f"{decision} {symbol}\n🎯 Alvo: {round(target, 5)}\n📊 Indicadores: {indicators}"
-                send_telegram_message(msg)
+                send_telegram_alert(msg)
 
         time.sleep(CHECK_INTERVAL)
 
