@@ -1,25 +1,29 @@
 import time
-from utils.indicators import fetch_price_data, calculate_indicators
+from utils.indicators import get_ema_signals
 from utils.analyzer import analyze_market
 from utils.telegram import send_telegram_alert
+from utils.data import fetch_price_data
 
-SYMBOLS = ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "SOLUSDT"]
-INTERVAL = "15m"
-LIMIT = 100
-SLEEP_TIME = 300  # 5 minutos entre análises
+symbols = ["BTCUSDT", "ETHUSDT", "DOGEUSDT", "SOLUSDT"]
 
 def analyze_and_alert(symbol):
     try:
-        df = fetch_price_data(symbol, INTERVAL, LIMIT)
-        df = calculate_indicators(df)
+        df = fetch_price_data(symbol)
+        df = get_ema_signals(df)
+
         action, analysis, target = analyze_market(df)
-        message = f"{action.upper()} {symbol} AGORA!\n🎯 Alvo estimado: {target}\n📊 Análise: {analysis}"
-        send_telegram_alert(message)
+
+        if action:
+            message = f"{action.upper()} {symbol} AGORA!\n🎯 Alvo estimado: {target}\n📊 Análise: {analysis}"
+            send_telegram_alert(message)
+        else:
+            print(f"{symbol}: Sem sinal claro.")
+
     except Exception as e:
         print(f"Erro ao analisar {symbol}: {e}")
 
 if __name__ == "__main__":
     while True:
-        for symbol in SYMBOLS:
+        for symbol in symbols:
             analyze_and_alert(symbol)
-        time.sleep(SLEEP_TIME)
+        time.sleep(300)
