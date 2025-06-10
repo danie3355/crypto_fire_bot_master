@@ -1,5 +1,3 @@
-# utils/telegram.py
-
 import requests
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
@@ -10,7 +8,8 @@ def send_telegram_alert(message):
         "text": message
     }
     try:
-        response = requests.post(url, data=payload)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao enviar mensagem para o Telegram: {e}")
+        response = requests.post(url, json=payload, timeout=10)
+        if not response.ok:
+            print(f"[ERRO] Telegram falhou: {response.text}")
+    except Exception as e:
+        print(f"[ERRO] Falha no envio para Telegram: {e}")
