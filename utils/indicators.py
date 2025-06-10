@@ -1,17 +1,11 @@
 import pandas as pd
+import ta
 
-def calculate_indicators(df):
-    df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
-    df['EMA_50'] = df['close'].ewm(span=50, adjust=False).mean()
-    df['RSI'] = compute_rsi(df['close'], 14).fillna(50)
+def apply_indicators(df):
+    df['ema20'] = ta.trend.ema_indicator(df['close'], window=20).ema_indicator()
+    df['ema50'] = ta.trend.ema_indicator(df['close'], window=50).ema_indicator()
+    df['rsi'] = ta.momentum.rsi(df['close'], window=14)
+    macd = ta.trend.macd(df['close'])
+    df['macd'] = macd.macd()
+    df['macd_signal'] = macd.macd_signal()
     return df
-
-def compute_rsi(series, period):
-    delta = series.diff()
-    gain = delta.clip(lower=0)
-    loss = -delta.clip(upper=0)
-    avg_gain = gain.rolling(window=period).mean()
-    avg_loss = loss.rolling(window=period).mean()
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
