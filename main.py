@@ -1,30 +1,19 @@
 import time
-from config import SYMBOLS, CHECK_INTERVAL
 from utils.telegram import send_telegram_alert
-from utils.analyzer import analyze_price
-import requests
+from utils.analyzer import analyze_market
+from config import SYMBOLS, CHECK_INTERVAL
 
-def fetch_price_data(symbol):
-    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1m&limit=10"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return []
-    data = response.json()
-    return [{"close": float(candle[4])} for candle in data]
-
-def main():
+def run_bot():
     while True:
         for symbol in SYMBOLS:
-            price_data = fetch_price_data(symbol)
-            if not price_data:
-                continue
-
-            decision, target, indicators = analyze_price(price_data)
-            if decision:
-                msg = f"{decision} {symbol}\n🎯 Alvo: {round(target, 5)}\n📊 Indicadores: {indicators}"
-                send_telegram_alert(msg)
-
+            try:
+                action, analysis, price_target = analyze_market(symbol)
+                if action:
+                    message = f"{action.upper()} {symbol} AGORA!\n🎯 Alvo estimado: {price_target}\n📊 Análise: {analysis}"
+                    send_telegram_alert(message)
+            except Exception as e:
+                print(f"Erro ao analisar {symbol}: {e}")
         time.sleep(CHECK_INTERVAL)
 
 if __name__ == "__main__":
-    main()
+    run_bot()
