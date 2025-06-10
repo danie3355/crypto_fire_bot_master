@@ -1,4 +1,2 @@
-schedule
-pandas
 requests
-python-telegram-bot
+pandas
