@@ -3,5 +3,4 @@ numpy
 pandas_ta
 schedule
 requests
-ccxt
 python-telegram-bot==13.15
