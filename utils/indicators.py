@@ -1,12 +1,12 @@
 import pandas as pd
 import pandas_ta as ta
-from numpy import nan
+
 def apply_indicators(df):
-    # Garante que os dados estão em ordem cronológica
+    # Cópia dos dados para evitar modificar o original
     df = df.copy()
     df.sort_index(inplace=True)
 
-    # Calcula indicadores técnicos
+    # Indicadores principais
     df['ema20'] = ta.ema(df['close'], length=20)
     df['ema50'] = ta.ema(df['close'], length=50)
     df['rsi'] = ta.rsi(df['close'], length=14)
