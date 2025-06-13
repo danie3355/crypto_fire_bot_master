@@ -1,5 +1,6 @@
-pandas_ta
 pandas
+numpy
+pandas_ta
+schedule
 requests
-ta
-ccxt
+python-telegram-bot==13.15
