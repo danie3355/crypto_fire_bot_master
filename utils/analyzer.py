@@ -1,4 +1,4 @@
-import ccxt 
+
 import pandas as pd
 from datetime import datetime, timedelta
 from utils.indicators import apply_indicators
