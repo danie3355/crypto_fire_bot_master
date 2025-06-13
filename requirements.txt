@@ -1,5 +1,4 @@
 pandas
-ccxt
 numpy
 pandas_ta
 schedule
