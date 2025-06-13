@@ -2,11 +2,10 @@ import pandas as pd
 import pandas_ta as ta
 
 def apply_indicators(df):
-    # Cópia dos dados para evitar modificar o original
     df = df.copy()
     df.sort_index(inplace=True)
 
-    # Indicadores principais
+    # Indicadores usados na análise de compra/venda
     df['ema20'] = ta.ema(df['close'], length=20)
     df['ema50'] = ta.ema(df['close'], length=50)
     df['rsi'] = ta.rsi(df['close'], length=14)
