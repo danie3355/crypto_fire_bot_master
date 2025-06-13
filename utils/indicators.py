@@ -1,6 +1,6 @@
 import pandas as pd
 import pandas_ta as ta
-
+from numpy import nan
 def apply_indicators(df):
     # Garante que os dados estão em ordem cronológica
     df = df.copy()
