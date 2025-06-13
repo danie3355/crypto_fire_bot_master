@@ -2,10 +2,11 @@ import pandas as pd
 import pandas_ta as ta
 
 def apply_indicators(df):
+    # Garante que os dados estão em ordem cronológica
     df = df.copy()
     df.sort_index(inplace=True)
 
-    # Indicadores técnicos principais
+    # Calcula indicadores técnicos
     df['ema20'] = ta.ema(df['close'], length=20)
     df['ema50'] = ta.ema(df['close'], length=50)
     df['rsi'] = ta.rsi(df['close'], length=14)
