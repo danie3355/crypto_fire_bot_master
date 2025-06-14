@@ -1,52 +1,34 @@
-import ccxt
 import pandas as pd
-from datetime import datetime, timedelta
-from utils.indicators import apply_indicators
+import requests
+from utils.indicators import generate_signal
 
-exchange = ccxt.binance()
+def get_price_data(symbol):
+    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=100'
+    response = requests.get(url)
+    data = response.json()
+    df = pd.DataFrame(data, columns=[
+        'timestamp', 'open', 'high', 'low', 'close', 'volume',
+        'close_time', 'quote_asset_volume', 'number_of_trades',
+        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+    ])
+    df['close'] = df['close'].astype(float)
+    return df[['close']]
 
-symbols = {
-    "BTC/USDT": "Bitcoin",
-    "ETH/USDT": "Ethereum",
-    "DOGE/USDT": "Dogecoin",
-    "SOL/USDT": "Solana"
-}
+def analyze_market(symbol):
+    try:
+        df = get_price_data(symbol)
+        signal, target, strategy = generate_signal(df)
 
-def fetch_data(symbol, timeframe='5m', limit=200):
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    return df
-
-def analyze_market():
-    results = []
-    for symbol, name in symbols.items():
-        df = fetch_data(symbol)
-        df = apply_indicators(df)
-
-        last = df.iloc[-1]
-
-        buy_signal = (
-            last['rsi'] < 30 and
-            last['ema20'] > last['ema50'] and
-            last['macd'] > last['macd_signal']
-        )
-        sell_signal = (
-            last['rsi'] > 70 and
-            last['ema20'] < last['ema50'] and
-            last['macd'] < last['macd_signal']
-        )
-
-        if buy_signal:
-            entry = round(last['close'], 4)
-            target = round(entry * 1.04, 4)
-            tempo = "em 2-12h"
-            tipo = "💥 Day Trade"
-            results.append(f"📈 COMPRA AGORA {name}\n🎯 Alvo: {target} USD\n💰 Entrada: {entry} USD\n⏱️ Estimativa: {tempo}\n📊 Tipo: {tipo}")
-        elif sell_signal:
-            entry = round(last['close'], 4)
-            target = round(entry * 0.96, 4)
-            tempo = "em 1-8h"
-            tipo = "⚠️ Swing Trade"
-            results.append(f"🔻 VENDE JÁ {name}\n🎯 Alvo: {target} USD\n💰 Preço atual: {entry} USD\n⏱️ Estimativa: {tempo}\n📊 Tipo: {tipo}")
-    return results
+        if signal:
+            return {
+                "symbol": symbol,
+                "action": signal,
+                "price_now": df['close'].iloc[-1],
+                "target_price": round(target, 4),
+                "strategy": strategy,
+                "timeframe": "1h"
+            }
+        else:
+            return None
+    except Exception as e:
+        return {"error": str(e)}
