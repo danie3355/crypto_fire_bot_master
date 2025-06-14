@@ -6,11 +6,10 @@ def send_telegram_message(message):
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
         "text": message,
-        "parse_mode": "Markdown"
+        "parse_mode": "HTML"
     }
-
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, data=payload)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"[ERRO] Falha ao enviar mensagem para o Telegram: {e}")
+        print(f"Erro ao enviar mensagem para o Telegram: {e}")
