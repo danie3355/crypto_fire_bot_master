@@ -1,38 +1,27 @@
 import pandas as pd
+import pandas_ta as ta
 
-def calculate_ema(data, period):
-    return data['close'].ewm(span=period, adjust=False).mean()
+def apply_indicators(df):
+    df = df.copy()
+    df.sort_index(inplace=True)
 
-def calculate_rsi(data, period=14):
-    delta = data['close'].diff()
-    gain = delta.where(delta > 0, 0.0)
-    loss = -delta.where(delta < 0, 0.0)
-    avg_gain = gain.rolling(window=period).mean()
-    avg_loss = loss.rolling(window=period).mean()
-    rs = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
+    # Indicadores principais
+    df['ema20'] = ta.ema(df['close'], length=20)
+    df['ema50'] = ta.ema(df['close'], length=50)
+    df['rsi'] = ta.rsi(df['close'], length=14)
 
-def calculate_macd(data):
-    ema12 = calculate_ema(data, 12)
-    ema26 = calculate_ema(data, 26)
-    macd = ema12 - ema26
-    signal = macd.ewm(span=9, adjust=False).mean()
-    return macd, signal
+    macd = ta.macd(df['close'])
+    df['macd'] = macd['MACD_12_26_9']
+    df['macd_signal'] = macd['MACDs_12_26_9']
 
-def generate_signal(data):
-    ema20 = calculate_ema(data, 20)
-    ema50 = calculate_ema(data, 50)
-    rsi = calculate_rsi(data)
-    macd, signal = calculate_macd(data)
+    # Bandas de Bollinger
+    bb = ta.bbands(df['close'], length=20, std=2)
+    df['bb_upper'] = bb['BBU_20_2.0']
+    df['bb_lower'] = bb['BBL_20_2.0']
 
-    last_price = data['close'].iloc[-1]
-    last_rsi = rsi.iloc[-1]
-    last_macd = macd.iloc[-1]
-    last_signal = signal.iloc[-1]
+    # Estocástico
+    stoch = ta.stoch(df['high'], df['low'], df['close'], k=14, d=3)
+    df['stoch_k'] = stoch['STOCHk_14_3_3']
+    df['stoch_d'] = stoch['STOCHd_14_3_3']
 
-    if last_rsi < 30 and last_macd > last_signal and ema20.iloc[-1] > ema50.iloc[-1]:
-        return "COMPRA AGORA", last_price * 1.05, "swing trade"
-    elif last_rsi > 70 and last_macd < last_signal and ema20.iloc[-1] < ema50.iloc[-1]:
-        return "VENDE JÁ", last_price * 0.95, "swing trade"
-    else:
-        return None, None, None
+    return df
