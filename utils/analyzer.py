@@ -1,34 +1,46 @@
-import pandas as pd
-import requests
-from utils.indicators import generate_signal
+from utils.indicators import apply_indicators
+from utils.data_fetcher import fetch_market_data
 
-def get_price_data(symbol):
-    url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=100'
-    response = requests.get(url)
-    data = response.json()
-    df = pd.DataFrame(data, columns=[
-        'timestamp', 'open', 'high', 'low', 'close', 'volume',
-        'close_time', 'quote_asset_volume', 'number_of_trades',
-        'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
-    ])
-    df['close'] = df['close'].astype(float)
-    return df[['close']]
+def analyze_market(symbol="DOGE/USDT"):
+    df = fetch_market_data(symbol)
+    df = apply_indicators(df)
 
-def analyze_market(symbol):
-    try:
-        df = get_price_data(symbol)
-        signal, target, strategy = generate_signal(df)
+    current_price = df['close'].iloc[-1]
+    ema20 = df['ema20'].iloc[-1]
+    ema50 = df['ema50'].iloc[-1]
+    rsi = df['rsi'].iloc[-1]
+    macd = df['macd'].iloc[-1]
+    macd_signal = df['macd_signal'].iloc[-1]
+    upper_band = df['bb_upper'].iloc[-1]
+    lower_band = df['bb_lower'].iloc[-1]
+    stoch_k = df['stoch_k'].iloc[-1]
+    stoch_d = df['stoch_d'].iloc[-1]
 
-        if signal:
-            return {
-                "symbol": symbol,
-                "action": signal,
-                "price_now": df['close'].iloc[-1],
-                "target_price": round(target, 4),
-                "strategy": strategy,
-                "timeframe": "1h"
-            }
-        else:
-            return None
-    except Exception as e:
-        return {"error": str(e)}
+    signal = None
+    reason = ""
+    target_price = current_price
+    trade_type = "swing" if abs(macd - macd_signal) > 0.05 else "day"
+    estimated_time = 4 if trade_type == "day" else 24
+
+    if ema20 > ema50 and rsi > 50 and macd > macd_signal and current_price < upper_band:
+        signal = "buy"
+        reason = "Tendência de alta confirmada com RSI e MACD favoráveis"
+        target_price = upper_band
+
+    elif ema20 < ema50 and rsi < 50 and macd < macd_signal and current_price > lower_band:
+        signal = "sell"
+        reason = "Tendência de baixa confirmada com RSI e MACD desfavoráveis"
+        target_price = lower_band
+
+    if signal:
+        return {
+            "symbol": symbol,
+            "signal": signal,
+            "reason": reason,
+            "target_price": target_price,
+            "current_price": current_price,
+            "trade_type": trade_type,
+            "estimated_time": estimated_time,
+            "rsi": rsi
+        }
+    return None
